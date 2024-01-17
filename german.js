@@ -3,9 +3,8 @@
 * @github-slug: googleadsscripts-automatic.searchterms.exclusion
 *
 * Dieses Google Ads-Skript identifiziert automatisch Suchbegriffe mit über
-* 100 Impressionen und keinen Klicks und fügt sie als exakte Übereinstimmungs-
-* negative Schlüsselwörter zu einer bestimmten Liste hinzu, um die Werbeausgaben
-* zu optimieren.
+* 100 Impressionen und keinen Klicks und fügt sie als exakte negativ Keywords 
+* zu einer bestimmten Liste hinzu, um die Werbeausgaben zu optimieren.
 */
 
 
