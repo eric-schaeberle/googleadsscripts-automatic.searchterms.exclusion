@@ -1,23 +1,76 @@
-Google Ads Script: Auto-Exclude Keywords with Over 100 Impressions and No Clicks
+Dieses Skript für Google Ads ermöglicht die automatische Identifikation und den Ausschluss von Suchbegriffen, die mehr als 100 Impressionen aber keine Klicks generiert haben. Durch das Hinzufügen dieser Begriffe als exakte negative Keywords zu einer spezifischen Liste werden Ihrer Zielgruppe genauer getroffen, wodurch Ihre Anzeigenrelevanz kontinuierlich verbessert wird.
 
-Overview
-This script for Google Ads automates the process of identifying and excluding search terms that have generated over 100 impressions but no clicks. It helps optimize ad spend by preventing ads from appearing for search terms that don't lead to engagement. The script adds these terms as exact match negative keywords to a specific negative keyword list in your Google Ads account.
+## Hauptfunktionen
+Analyse von Suchbegriffen: Ermittelt Suchbegriffe mit über 100 Impressionen und 0 Klicks.
+Verwaltung negativer Keyword-Listen: Überprüft, ob eine bestimmte negative Keyword-Liste existiert, und erstellt diese bei Bedarf.
+Exakte Übereinstimmung: Fügt die identifizierten Suchbegriffe als exakte negative Keywords zur Liste hinzu.
 
-Features
-Keyword Analysis: Identifies search terms with over 100 impressions but zero clicks.
-Negative Keyword List Management: Checks if a specific negative keyword list exists and creates one if it doesn't.
-Exact Match Exclusion: Adds the identified search terms as exact match negative keywords to the list.
+## Funktionsweise
+Das Skript führt eine Abfrage in der search_term_view durch, um Suchbegriffe mit mehr als 100 Impressionen und keinen Klicks zu finden. Es überprüft, ob eine negative Keyword-Liste mit dem Namen "Keywords über 100 Impressionen ohne Klicks" existiert. Falls nicht, wird eine solche Liste erstellt. Anschließend werden die identifizierten Keywords als exakte Übereinstimmungen in die Liste eingefügt.
 
-How It Works
-Data Querying: The script queries the search_term_view to find search terms with ≥100 impressions and 0 clicks.
-List Verification: It checks for the existence of a negative keyword list named "Keywords über 100 Impressionen ohne Klicks" (Keywords with over 100 Impressions and No Clicks). If the list doesn't exist, the script creates it.
-Keyword Addition: Each identified search term is added as an exact match negative keyword to the specified list.
+### Einleitung und Abfrage
+```javascript
+// Abfrage, um Suchbegriffe mit mindestens 100 Impressionen und keinen Klicks zu finden
+const report = AdsApp.report(
+    `SELECT search_term_view.search_term, ` +
+    `metrics.impressions, metrics.clicks ` +
+    `FROM search_term_view ` +
+    `WHERE metrics.impressions >= 100 ` +
+    `AND metrics.clicks = 0`);
+```
+Dieser Abschnitt führt eine Abfrage in der search_term_view von Google Ads durch. Es werden Suchbegriffe ausgewählt, die mindestens 100 Impressionen aber keine Klicks erhalten haben. Diese Suchbegriffe sind potenzielle Kandidaten für den Ausschluss.
 
-Usage
-This script can be scheduled to run regularly in your Google Ads account to continuously update the negative keyword list.
-Ensure that the name of the negative keyword list in the script matches the one in your Google Ads account or adjust accordingly.
-It is recommended to review the list periodically to ensure relevance and accuracy.
+### Sammeln der Suchbegriffe
+```javascript
+const rows = report.rows();
+const keywordsToExclude = [];
 
-Customization
-The script can be modified to change the impressions threshold or to apply different criteria for keyword exclusion.
-It can also be adjusted to work with different types of campaigns or to manage multiple lists.
+while (rows.hasNext()) {
+  var row = rows.next();
+  var keywordQuery = row['search_term_view.search_term'];
+  keywordsToExclude.push(keywordQuery);
+}
+```
+Hier werden die Ergebnisse der Abfrage durchlaufen. Jeder Suchbegriff, der die Kriterien erfüllt, wird in ein Array keywordsToExclude aufgenommen.
+
+### Überprüfung und Erstellung der negativen Keyword-Liste
+```javascript
+// Name der negativen Keyword-Liste
+var negativeListName = 'Keywords über 100 Impressionen ohne Klicks';
+
+// Prüfen, ob die Liste bereits existiert
+var negativeListIterator = AdsApp.negativeKeywordLists()
+    .withCondition('Name = "' + negativeListName + '"')
+    .get();
+
+var negativeList;
+if (negativeListIterator.hasNext()) {
+  negativeList = negativeListIterator.next();
+} else {
+  // Erstellen einer neuen negativen Keyword-Liste, falls sie nicht existiert
+  negativeList = AdsApp.newNegativeKeywordListBuilder()
+      .withName(negativeListName)
+      .build()
+      .getResult();
+}
+```
+In diesem Abschnitt wird überprüft, ob eine negative Keyword-Liste mit dem festgelegten Namen bereits existiert. Wenn nicht, wird eine neue Liste erstellt.
+
+### Hinzufügen der Keywords als Exact Match
+```javascript
+// Hinzufügen der Keywords zur negativen Keyword-Liste als Exact Match
+for (var i = 0; i < keywordsToExclude.length; i++) {
+  negativeList.addNegativeKeyword('[' + keywordsToExclude[i] + ']');
+}
+```
+Zum Schluss werden alle identifizierten Keywords als exakte Übereinstimmungen (Exact Match) zur negativen Keyword-Liste hinzugefügt. Die eckigen Klammern [ ] kennzeichnen dabei eine exakte Übereinstimmung.
+
+## Zusammenfassung
+Dieses Skript automatisiert den Prozess des Ausschlusses nicht effektiver Suchbegriffe in Google Ads, um die Effizienz von Werbekampagnen zu steigern. Es identifiziert Suchbegriffe mit hoher Sichtbarkeit, aber ohne Interaktion und schließt sie gezielt aus, um die Anzeigenrelevanz und CTR zu verbessern.
+
+## Anwendung
+Das Skript kann regelmäßig in Ihrem Google Ads-Konto ausgeführt werden, um die negative Keyword-Liste kontinuierlich zu aktualisieren. Es ist ratsam, die Liste periodisch zu überprüfen, um ihre Relevanz und Genauigkeit sicherzustellen.
+
+## Anpassung
+Das Skript kann modifiziert werden, um die Schwellenwerte zu ändern oder unterschiedliche Kriterien für den Ausschluss von Keywords anzuwenden. Es kann auch angepasst werden, um mit verschiedenen Kampagnentypen zu arbeiten oder mehrere Listen zu verwalten.
+
