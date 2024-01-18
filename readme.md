@@ -1,4 +1,4 @@
-# Google Ads Script: Automatische Ausschluss von Suchbegriffen
+# Google Ads Script: Automatischer Ausschluss von Suchbegriffen
 
 Dieses Skript für Google Ads ermöglicht die automatische Identifikation und den Ausschluss von Suchbegriffen, die mehr als 100 Impressionen aber keine Klicks generiert haben. Durch das Hinzufügen dieser Begriffe als exakte negative Keywords zu einer spezifischen Liste werden Ihrer Zielgruppe genauer getroffen, wodurch Ihre Anzeigenrelevanz kontinuierlich verbessert wird.
 
